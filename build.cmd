@@ -1,6 +1,6 @@
 @echo off
 
-pyinstaller podcast_downloader.py ^
+pyinstaller startup.py ^
 --onefile ^
 --log-level=DEBUG ^
 --specpath=.\build\ ^
