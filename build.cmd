@@ -1,8 +1,8 @@
 @echo off
 
-pyinstaller startup.py ^
+pyinstaller startup_cli.py ^
 --onefile ^
 --log-level=DEBUG ^
 --specpath=.\build\ ^
---name="PodcastDownloader" ^
+--name="PodcastDownloaderCLI" ^
 --icon=.\icon\icon.ico
