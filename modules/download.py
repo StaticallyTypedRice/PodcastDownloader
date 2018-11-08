@@ -5,7 +5,7 @@ from xml.etree.ElementTree import Element
 from urllib import request
 
 from .podcast import Episode
-from .string import str_to_filename, command_line_to_bool
+from .string import str_to_filename
 from .xml import get_unique_xml_element
 
 def podcast_download(rss: Element, delay: int=0, output_dir: str='',
