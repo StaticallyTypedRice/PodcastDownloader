@@ -97,3 +97,7 @@ ENV/
 
 # Visual Studio Code
 .vscode/
+
+# The default download folder
+# Often used when testing the program
+download/
