@@ -88,8 +88,12 @@ def startup():
     print(f'{str(download["total_downloads"])} files downloaded.')
     print(f'{str(download["total_errors"])} errors.')
 
-    # Prevent the window from closing when the download is complete
-    input('\nPress ENTER to exit')
 
 if __name__ == '__main__':
-    startup()
+    try:
+        startup()
+    except KeyboardInterrupt:
+        print("\nDownloading cancelled.")
+
+    # Prevent the window from closing when the download is complete
+    input('\nPress ENTER to exit')
