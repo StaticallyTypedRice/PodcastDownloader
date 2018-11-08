@@ -2,6 +2,7 @@ from defusedxml import ElementTree
 
 from modules.xml import get_unique_xml_element, parse_remote_xml
 from modules.download import podcast_download
+from modules.string import command_line_to_bool
 
 def startup():
     '''The startup function.'''
