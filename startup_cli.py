@@ -77,6 +77,10 @@ def startup():
 
     print('Starting download...\n')
 
+    # Count the total number of files
+    total_files = len(rss.findall('channel/item'))
+    print(f'{str(total_files)} file{"s" if total_files != 1 else ""} in total.\n')
+
     # Call the download function
     download = podcast_download(rss, delay, output_dir, rename, print_progress=True)
 
