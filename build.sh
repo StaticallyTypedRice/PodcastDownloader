@@ -2,6 +2,7 @@
 
 pyinstaller ./src/startup.py \
 --onefile \
+--noconsole \
 --log-level=DEBUG \
 --specpath=./build/ \
 --name="PodcastDownloader" \
