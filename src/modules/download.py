@@ -44,14 +44,23 @@ def podcast_download(rss: Element, delay: int=0, output_dir: str='',
 
     # Find all RSS <item> elements
     items = rss.findall('channel/item')
+	
+	# Count the total number of files
+    total_files = len(items)
+	
+    # Keep track of the file number
+    file_number = 0
     
     for item in items:
+	
+        # Increment the file number
+        file_number += 1
 
         # Parse the <item> element for the episode
         episode = Episode(item)
 
         if print_progress:
-            print(f'Downloading "{episode.title}"')
+            print(f'Downloading {str(file_number)} of {str(total_files)}: "{episode.title}"')
              
         if rename:
             # Rename the file to the episode title
