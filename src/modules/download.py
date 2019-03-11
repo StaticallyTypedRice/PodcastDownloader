@@ -7,9 +7,10 @@ from urllib import request
 from .podcast import Episode
 from .string import str_to_filename
 from .xml import get_unique_xml_element
+from .misc import null
 
 def podcast_download(rss: Element, delay: int=0, output_dir: str='',
-                     rename: bool=False, print_progress: bool=False) -> dict:
+                     rename: bool=False, print_progress=null) -> dict:
     '''The main function.
 
     Download all episodes in a podcast.
@@ -19,7 +20,7 @@ def podcast_download(rss: Element, delay: int=0, output_dir: str='',
         delay: The delay in seconds between file downloads.
         output_dir: The output directory name (or the same directory if an empty string is supplied).
         rename: Whether to rename the downloaded file to the name of the to the episode.
-        print_progress: Whether to print the download progress to the console.
+        print_progress: The function for handling the progress output.
     '''
 
     # Count the number of files downloaded and the number of errors
@@ -59,8 +60,7 @@ def podcast_download(rss: Element, delay: int=0, output_dir: str='',
         # Parse the <item> element for the episode
         episode = Episode(item)
 
-        if print_progress:
-            print(f'Downloading {str(file_number)} of {str(total_files)}: "{episode.title}"')
+        print_progress(f'Downloading {str(file_number)} of {str(total_files)}: "{episode.title}"')
              
         if rename:
             # Rename the file to the episode title
@@ -80,8 +80,7 @@ def podcast_download(rss: Element, delay: int=0, output_dir: str='',
                 'downloaded': True,
             })
         except Exception as e:
-            if print_progress:
-                print(f'  ERROR -> {str(e)}')
+            print_progress(f'  ERROR -> {str(e)}')
 
             file_errors += 1
             download_progress.append({

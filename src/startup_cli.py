@@ -82,7 +82,7 @@ def startup():
     print(f'{str(total_files)} file{"s" if total_files != 1 else ""} in total.\n')
 
     # Call the download function
-    download = podcast_download(rss, delay, output_dir, rename, print_progress=True)
+    download = podcast_download(rss, delay, output_dir, rename, print_progress=print)
 
     print('Download complete\n')
     print(f'{str(download["total_downloads"])} files downloaded.')
