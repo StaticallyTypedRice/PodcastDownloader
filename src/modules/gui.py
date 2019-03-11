@@ -8,6 +8,60 @@ from PySide2.QtWidgets import *
 SPACING_VERTICAL = 15
 SPACING_HORIZONTAL = SPACING_VERTICAL
 
+class ParallelWidgets(QtWidgets.QWidget):
+    '''Places two or more widgets in parallel horizontally (side by side).
+    
+    Arguments:
+     - This class should be initialized with each widget as its own argument,
+       in order from left to right
+       Example: ParallelWidgets(QWidgetLeft(), QWidgetRight())
+    '''
+
+    def __init__(self, *args, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+
+        self.layout = QtWidgets.QHBoxLayout()
+
+        # Add each widget to the horizontal box
+        for a in args:
+            self.layout.addWidget(a)
+
+        self.setLayout(self.layout)
+
+def validate_required_fields(widgets: list) -> dict:
+    '''Checks that all reqired fields are filled.
+
+    Returns a dict with two variables:
+     - valid: True if and only if all fields are valid
+     - fields: A list of booleans corresponding to the validity of each field
+
+    Arguments:
+     - widgets: a list of text field widget objects
+    '''
+
+    # This variable will be set to false if any fields are invalid
+    valid = True
+
+    # List whether each field is valid
+    # in the order as they were passed as arguments
+    fields = []
+
+    for w in widgets:
+        if not w.text():
+            # Set 'valid' to false if a field is empty
+            valid = False
+
+            # Record the validity of the field
+            fields.append(False)
+        else:
+            # Record the validity of the field
+            fields.append(True)
+
+    return {
+        'valid': valid,
+        'fields': fields,
+    }
+
 class MainForm(QtWidgets.QWidget):
     '''The main input widget.'''
     
@@ -17,6 +71,7 @@ class MainForm(QtWidgets.QWidget):
         # Podcast information
         self.podcast_source = QLineEdit()
         self.podcast_location = QLineEdit()
+        #self.podcast_location.setText("http://")
 
         # Download settings
         self.delay = QLineEdit()
@@ -51,7 +106,6 @@ class MainForm(QtWidgets.QWidget):
 
         self.layout.addWidget(self.download_button)
         
-
         #layout.addWidget(QLineEdit())
         self.layout.setAlignment(QtCore.Qt.AlignTop)
         self.layout.setGeometry(QtCore.QRect())
@@ -63,8 +117,16 @@ class MainForm(QtWidgets.QWidget):
 
     def start_download(self):
         print("Download function placeholder.")
-        print(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
-        print()
+
+        required_fields = [self.podcast_location, self.download_to]
+        validate = validate_required_fields(required_fields)
+
+        if validate['valid']:
+            print(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
+        else:
+            pass
+            #TODO
+
 
 class ProgressDisplay(QtWidgets.QWidget):
     '''The main output widget.'''
@@ -98,3 +160,121 @@ class MainWidget(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
         self.setGeometry(10, 10, 1000, 500)
+
+# Functions
+def validate_number_fields(widgets: list, integer: bool=False, max: tuple=(None, True),
+                           min: tuple=(None, True)) -> dict:
+    '''Checks that number fields are valid.
+
+    Returns a dict with two variables:
+     - valid: True if and only if all fields are valid
+
+     - fields: A list of tuples corresponding each field, where the first value is the
+               validity and the second value is a list of strings for the reasons it is
+               invalid. See the error strings section.
+
+    Error strings:
+     - 'not_a_number'
+     - 'not_an_integer'
+     - 'too_large'
+     - 'too_small'
+
+    Arguments:
+     - widgets: a list of text field widget objects
+
+     - integer: if true, the fields will only accept integers
+
+     - max: a tuple where the first value is the maximum acceptable number and
+            the second value is a boolean of whether the maximum number
+            should be accepted. Use None as the first value for an unlimited range.
+
+     - max: a tuple where the first value is the maximum acceptable number and
+            the second value is a boolean of whether the maximum number
+            should be accepted. Use None as the first value for an unlimited range.
+
+    Examples:
+     - Accepts positive integers:
+        validate_number_fields(field, integer=True, max=(None, True), min=(0, False))
+
+     - Accepts negative integers:
+        validate_number_fields(field, integer=True, max=(0, False), min=(None, True))
+
+     - Accepts positive integers and zero:
+        validate_number_fields(field, integer=True, max=(None, True), min=(0, True))
+    '''
+
+    # This variable will be set to false if any fields are invalid
+    valid = True
+
+    # List whether each field is valid
+    # in the order as they were passed as arguments
+    fields = []
+
+    for w in widgets:
+        # This variable will be set to false if the current field is invalid
+        field_valid = True
+
+        # Keep track of the errors
+        errors = []
+
+        # Check that the value is a number
+        # The other checks are in this try-catch block because they will all fail
+        # the input is not a number.
+        try:
+            # Try to convert the string to a float
+            number = float(w.text())
+
+            # Check that the value is an integer if applicable
+            if integer:
+                try:
+                    int(number)
+                except:
+                    field_valid = False
+                    errors.append('not_an_integer')
+
+            # Check that the value is not too large is applicable
+            if max[0] is not None:
+                if max[1]:
+                    # The maximum value is acceptable
+                    if not number <= max[0]:
+                        field_valid = False
+                        errors.append('too_large')
+                else:
+                    # The maximum value is not acceptable
+                    if not number < max[0]:
+                        field_valid = False
+                        errors.append('too_large')
+
+            if min[0] is not None:
+                if min[1]:
+                    # The maximum value is acceptable
+                    if not number >= min[0]:
+                        field_valid = False
+                        errors.append('too_small')
+                else:
+                    # The maximum value is not acceptable
+                    if not number > min[0]:
+                        field_valid = False
+                        errors.append('too_small')
+                
+        except:
+            field_valid = False
+            errors.append('not_a_number')
+
+        # Record the validation results
+        valid = valid and field_valid
+        fields.append((field_valid, errors))
+
+    return {
+        'valid': valid,
+        'fields': fields,
+    }
+
+def highlight_invalid_field(field, revert=False):
+    '''Applies a stylesheet property to an invalid field.
+    
+    Arguments:
+     - field: the field widget object
+     - revert: if true, the highlighting is removed
+    '''
+    #TODO
