@@ -8,6 +8,9 @@ from PySide2.QtWidgets import *
 SPACING_VERTICAL = 15
 SPACING_HORIZONTAL = SPACING_VERTICAL
 
+# An empty widget for when a widget is required but no relevant widget is available.
+
+#region WIDGET_CLASSES
 class ParallelWidgets(QtWidgets.QWidget):
     '''Places two or more widgets in parallel horizontally (side by side).
     
@@ -28,11 +31,51 @@ class ParallelWidgets(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
+class ProgressDisplay(QtWidgets.QWidget):
+    '''The main output widget.'''
+
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+
+        # The output is displayed as a text box
+        self.output = QtWidgets.QTextEdit()
+
+        # Widget layout
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.addWidget(self.output)
+        self.setLayout(self.layout)
+
+    def append_progress(self, message: str, end: str='\n'):
+        '''Appends to the progress box.
+
+        Arguments:
+            - message: the string to append.
+            - end: also automatically append this string (a line break by default).
+        '''
+
+        new_output = self.output.toPlainText() + message + end
+
+        self.output.setText(new_output)
+
+    def clear_progress(self):
+        '''Clears the progress box.'''
+
+        self.output.setText('')
+
 class MainForm(QtWidgets.QWidget):
     '''The main input widget.'''
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, progress_display=None):
+        '''Initializes the widget.
+
+        Specialty arguments:
+         - progress_display: the widget for outputting the progress.
+        '''
+
         QtWidgets.QWidget.__init__(self, parent)
+
+        # Define the progress display function
+        self.progress_display = progress_display
 
         # Podcast information
         self.podcast_source = QLineEdit()
@@ -81,7 +124,29 @@ class MainForm(QtWidgets.QWidget):
         # Event listener for the download button
         self.download_button.clicked.connect(self.start_download)
 
+    def append_progress(self, *args, **kwargs):
+        try:
+            self.progress_display.append_progress(*args, **kwargs)
+        except AttributeError:
+            # Likely indicates that no progress function was applied.
+            # Don't output progress information in this case.
+            pass
+
+    def clear_progress(self, *args, **kwargs):
+        try:
+            self.progress_display.clear_progress(*args, **kwargs)
+        except AttributeError:
+            # Likely indicates that no progress function was applied.
+            # Don't output progress information in this case.
+            pass
+        
+
     def start_download(self):
+        '''Handles the click event for the download button.
+        Validates inputs and calls the download function.'''
+
+        # First clear the progress display
+        self.clear_progress()
 
         required_fields = [self.podcast_location, self.download_to]
         number_fields = [self.delay]
@@ -105,22 +170,11 @@ class MainForm(QtWidgets.QWidget):
 
         # Download the files if all fields are valid
         if validate_required['valid']:
-            print(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
+            self.append_progress(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
             #TODO
+        else:
+            self.append_progress('Invalid input in one or more fields.')
 
-class ProgressDisplay(QtWidgets.QWidget):
-    '''The main output widget.'''
-
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-
-        # The output is displayed as a text box
-        self.output = QtWidgets.QTextEdit()
-
-        # Widget layout
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.output)
-        self.setLayout(self.layout)
 
 class MainWidget(QtWidgets.QWidget):
     '''The main GUI widget.'''
@@ -128,9 +182,8 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
-        self.input_widget = MainForm(self)
-
         self.output_widget = ProgressDisplay(self)
+        self.input_widget = MainForm(self, progress_display=self.output_widget)
 
         # Widget layout
         self.layout = QtWidgets.QHBoxLayout()
@@ -141,7 +194,9 @@ class MainWidget(QtWidgets.QWidget):
 
         self.setGeometry(10, 10, 1000, 500)
 
-# Functions
+#endregion
+
+#region FUNCTIONS
 def validate_required_fields(widgets: list) -> dict:
     '''Checks that all reqired fields are filled.
 
@@ -294,3 +349,5 @@ def highlight_invalid_field(field, revert: bool=False):
     print(field)
 
     #TODO
+
+#endregion
