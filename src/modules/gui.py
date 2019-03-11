@@ -28,40 +28,6 @@ class ParallelWidgets(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
-def validate_required_fields(widgets: list) -> dict:
-    '''Checks that all reqired fields are filled.
-
-    Returns a dict with two variables:
-     - valid: True if and only if all fields are valid
-     - fields: A list of booleans corresponding to the validity of each field
-
-    Arguments:
-     - widgets: a list of text field widget objects
-    '''
-
-    # This variable will be set to false if any fields are invalid
-    valid = True
-
-    # List whether each field is valid
-    # in the order as they were passed as arguments
-    fields = []
-
-    for w in widgets:
-        if not w.text():
-            # Set 'valid' to false if a field is empty
-            valid = False
-
-            # Record the validity of the field
-            fields.append(False)
-        else:
-            # Record the validity of the field
-            fields.append(True)
-
-    return {
-        'valid': valid,
-        'fields': fields,
-    }
-
 class MainForm(QtWidgets.QWidget):
     '''The main input widget.'''
     
@@ -116,17 +82,31 @@ class MainForm(QtWidgets.QWidget):
         self.download_button.clicked.connect(self.start_download)
 
     def start_download(self):
-        print("Download function placeholder.")
 
         required_fields = [self.podcast_location, self.download_to]
-        validate = validate_required_fields(required_fields)
+        number_fields = [self.delay]
 
-        if validate['valid']:
+        validate_required = validate_required_fields(required_fields)
+        validate_numbers = validate_number_fields(number_fields, integer=True, min=(0, True))
+
+        # Highlight invalid fields
+        if not validate_required['valid']:
+            i = 0
+            for field in validate_required['fields']:
+                if not field:
+                    highlight_invalid_field(required_fields[i])
+                i += 1
+        if not validate_numbers['valid']:
+            i = 0
+            for field in validate_numbers['fields']:
+                if not field[0]:
+                    highlight_invalid_field(number_fields[i])
+                i += 1
+
+        # Download the files if all fields are valid
+        if validate_required['valid']:
             print(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
-        else:
-            pass
             #TODO
-
 
 class ProgressDisplay(QtWidgets.QWidget):
     '''The main output widget.'''
@@ -162,6 +142,40 @@ class MainWidget(QtWidgets.QWidget):
         self.setGeometry(10, 10, 1000, 500)
 
 # Functions
+def validate_required_fields(widgets: list) -> dict:
+    '''Checks that all reqired fields are filled.
+
+    Returns a dict with two variables:
+     - valid: True if and only if all fields are valid
+     - fields: A list of booleans corresponding to the validity of each field
+
+    Arguments:
+     - widgets: a list of text field widget objects
+    '''
+
+    # This variable will be set to false if any fields are invalid
+    valid = True
+
+    # List whether each field is valid
+    # in the order as they were passed as arguments
+    fields = []
+
+    for w in widgets:
+        if not w.text():
+            # Set 'valid' to false if a field is empty
+            valid = False
+
+            # Record the validity of the field
+            fields.append(False)
+        else:
+            # Record the validity of the field
+            fields.append(True)
+
+    return {
+        'valid': valid,
+        'fields': fields,
+    }
+
 def validate_number_fields(widgets: list, integer: bool=False, max: tuple=(None, True),
                            min: tuple=(None, True)) -> dict:
     '''Checks that number fields are valid.
@@ -270,11 +284,13 @@ def validate_number_fields(widgets: list, integer: bool=False, max: tuple=(None,
         'fields': fields,
     }
 
-def highlight_invalid_field(field, revert=False):
+def highlight_invalid_field(field, revert: bool=False):
     '''Applies a stylesheet property to an invalid field.
     
     Arguments:
      - field: the field widget object
      - revert: if true, the highlighting is removed
     '''
+    print(field)
+
     #TODO
