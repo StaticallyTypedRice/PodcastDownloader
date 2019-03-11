@@ -40,6 +40,9 @@ class ProgressDisplay(QtWidgets.QWidget):
         # The output is displayed as a text box
         self.output = QtWidgets.QTextEdit()
 
+        # Make the progress display read only.
+        self.output.setReadOnly(True)
+
         # Widget layout
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.output)
