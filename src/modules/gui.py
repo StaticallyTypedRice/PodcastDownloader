@@ -137,6 +137,10 @@ class MainForm(QtWidgets.QWidget):
         # Event listener for the download button
         self.download_button.clicked.connect(self.start_download)
 
+        # Set the default values
+        self.delay.setText('1')
+        self.download_to.setText('download')
+
     def append_progress(self, *args, **kwargs):
         try:
             self.progress_display.append_progress(*args, **kwargs)
