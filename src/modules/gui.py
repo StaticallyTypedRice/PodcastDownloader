@@ -3,12 +3,20 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtWidgets import *
 
-# Constants
+#region CONSTANTS
+
 # Standard layout spacing sizes
 SPACING_VERTICAL = 15
 SPACING_HORIZONTAL = SPACING_VERTICAL
 
-# An empty widget for when a widget is required but no relevant widget is available.
+# Stylesheets
+MAINFORM_STYLESHEET = '''
+    QLineEdit[error=true] {
+        border: 1px solid red;
+    }
+'''
+
+#endregion
 
 #region WIDGET_CLASSES
 class ParallelWidgets(QtWidgets.QWidget):
@@ -80,10 +88,12 @@ class MainForm(QtWidgets.QWidget):
         # Define the progress display function
         self.progress_display = progress_display
 
+        # Set the stylesheet
+        self.setStyleSheet(MAINFORM_STYLESHEET)
+
         # Podcast information
         self.podcast_source = QLineEdit()
         self.podcast_location = QLineEdit()
-        #self.podcast_location.setText("http://")
 
         # Download settings
         self.delay = QLineEdit()
@@ -349,8 +359,11 @@ def highlight_invalid_field(field, revert: bool=False):
      - field: the field widget object
      - revert: if true, the highlighting is removed
     '''
-    print(field)
+    field.setProperty('error', not revert)
 
-    #TODO
+    # Update the firld styling
+    field.style().unpolish(field)
+    field.style().polish(field)
+    field.update()
 
 #endregion
