@@ -2,6 +2,10 @@
 
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtWidgets import *
+from defusedxml import ElementTree
+
+from modules.xml import get_unique_xml_element, parse_remote_xml
+from modules.download import podcast_download
 
 #region CONSTANTS
 
@@ -56,11 +60,11 @@ class ProgressDisplay(QtWidgets.QWidget):
         self.layout.addWidget(self.output)
         self.setLayout(self.layout)
 
-    def append_progress(self, message: str, end: str='\n'):
+    def append_progress(self, message: str='', end: str='\n'):
         '''Appends to the progress box.
 
         Arguments:
-            - message: the string to append.
+            - message: the string to append (blank by default).
             - end: also automatically append this string (a line break by default).
         '''
 
@@ -162,17 +166,20 @@ class MainForm(QtWidgets.QWidget):
             # Don't output progress information in this case.
             pass
         
+    def validate(self):
+        '''Validate fform inputs.
 
-    def start_download(self):
-        '''Handles the click event for the download button.
-        Validates inputs and calls the download function.'''
-
-        # First clear the progress display
-        self.clear_progress()
+        Return a boolean corresponding to whether the form data in valid.
+        '''
 
         required_fields = [self.podcast_location, self.download_to]
         number_fields = [self.delay]
 
+        # Remove field highlights
+        for field in (required_fields + number_fields):
+            highlight_invalid_field(field, revert=True)
+
+        # Validate field requirements
         validate_required = validate_required_fields(required_fields)
         validate_numbers = validate_number_fields(number_fields, integer=True, min=(0, True))
 
@@ -190,13 +197,58 @@ class MainForm(QtWidgets.QWidget):
                     highlight_invalid_field(number_fields[i])
                 i += 1
 
+        return validate_required['valid'] and validate_numbers['valid']
+
+    def start_download(self):
+        '''Handles the click event for the download button.
+        Validates inputs and calls the download function.'''
+
+        # First clear the progress display
+        self.clear_progress()
+
         # Download the files if all fields are valid
-        if validate_required['valid']:
+        if self.validate():
+
             self.append_progress(f"Downloading from {self.podcast_location.text()} to {self.download_to.text()}.")
-            #TODO
+            self.append_progress()
+            
+            # This will be set to false if there is an error in the download options.
+            can_download = True
+
+            try:
+                # Parse the RSS file
+                if self.podcast_source.currentText() == 'Remote RSS file':
+                    rss = parse_remote_xml(self.podcast_location.text())
+                elif self.podcast_source.currentText() == 'Local RSS file':
+                    rss = ElementTree.parse(self.podcast_location.text())
+                else:
+                    # This should in theory not happen because the source field is a dropdown.
+                    self.append_progress('Invalid podcast source.')
+            except Exception as e:
+                # If there is an error, print it and highlight the field.
+                can_download = False
+                highlight_invalid_field(self.podcast_location)
+                self.append_progress('Error when parsing the RSS file:')
+                self.append_progress(str(e))
+
+            if can_download:
+                self.append_progress('Starting download...\n')
+
+                # Count the total number of files
+                total_files = len(rss.findall('channel/item'))
+                self.append_progress(f'{str(total_files)} file{"s" if total_files != 1 else ""} in total.\n')
+
+                # Call the download function
+                download = podcast_download(rss, int(self.delay.text()), self.download_to.text(),
+                                                     self.rename.checkState() == QtCore.Qt.CheckState.Checked,
+                                                     print_progress=self.append_progress)
+
+                self.append_progress('Download complete\n')
+                self.append_progress(f'{str(download["total_downloads"])} files downloaded.')
+                self.append_progress(f'{str(download["total_errors"])} errors.')
+
         else:
             self.append_progress('Invalid input in one or more fields.')
-
 
 class MainWidget(QtWidgets.QWidget):
     '''The main GUI widget.'''
