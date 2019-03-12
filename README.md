@@ -42,6 +42,8 @@ For Mac or Linux, run the `build.sh` file.
 
 The executables can be found in the `dist` folder.
 
+Optionally, if you want to use UPX, download it from https://upx.github.io/ and extract it to the `upx` folder, such that the UPX executable is in the folder root.
+
 You can also build the project manually using PyInstaller using whatever arguments you like:
 
     cd src

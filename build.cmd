@@ -6,6 +6,7 @@ pyinstaller .\src\startup.py ^
 --log-level=DEBUG ^
 --specpath=.\build\ ^
 --name="PodcastDownloader" ^
+--upx-dir=.\upx ^
 --icon=.\src\icon\icon.ico
 
 pyinstaller .\src\startup_cli.py ^
@@ -13,4 +14,5 @@ pyinstaller .\src\startup_cli.py ^
 --log-level=DEBUG ^
 --specpath=.\build\ ^
 --name="PodcastDownloaderCLI" ^
+--upx-dir=.\upx ^
 --icon=.\src\icon\icon.ico
