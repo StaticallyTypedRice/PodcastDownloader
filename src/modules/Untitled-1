@@ -1,0 +1,46 @@
+        # Download the files if all fields are valid
+        if validate_required['valid']:
+            self.append_progress('Starting download...\n')
+
+            # Count the total number of files
+            total_files = len(rss.findall('channel/item'))
+            self.append_progress(f'{str(total_files)} file{"s" if total_files != 1 else ""} in total.\n')
+
+            # Call the download function
+            download = podcast_download(self.podcast_location, self.delay, self.download_to,
+                                        self.rename, print_progress=self.append_progress)
+
+            self.append_progress('Download complete\n')
+            self.append_progress(f'{str(download["total_downloads"])} files downloaded.')
+            priself.append_progressnt(f'{str(download["total_errors"])} errors.')
+        else:
+            self.append_progress('Invalid input in one or more fields.')
+
+
+class MainForm(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+         QtWidgets.QWidget.__init__(self, parent)
+
+         self.setStyleSheet('''
+            QLineEdit[error~="true"] {
+                border: 1px solid red;
+            }
+        ''')
+
+        self.input0 = QLineEdit()
+        self.input1 = QLineEdit()
+
+        # Some other code for setting the layout...
+
+        # This works. The style changes.
+        self.input0.setProperty('error', 'true')
+
+    def validate_inputs(self):
+        # Code for validating functions...
+        # For testing, I just hard coded a setProperty call:
+
+        # This doesn't work. There is no change in appearence.
+        self.input1.setProperty('error', 'true')
+
+        
+
