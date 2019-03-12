@@ -92,7 +92,12 @@ class MainForm(QtWidgets.QWidget):
         self.setStyleSheet(MAINFORM_STYLESHEET)
 
         # Podcast information
-        self.podcast_source = QLineEdit()
+        podcast_sources = [
+            'Remote RSS file',
+            'Local RSS file',
+        ]
+        self.podcast_source = QComboBox()
+        self.podcast_source.addItems(podcast_sources)
         self.podcast_location = QLineEdit()
 
         # Download settings
