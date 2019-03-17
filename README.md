@@ -8,7 +8,7 @@ Podcast Downloader is a simple utility for automatically downloading all podcast
 
 The startup files are in the `src` folder. Simply run one of the following commands (on either Windows, Mac or Linux).
 
-For a graphical interface (not yet implemented):
+For a graphical interface (**currently still in development**):
 
     cd src
     python3 startup.py
