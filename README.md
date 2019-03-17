@@ -26,7 +26,7 @@ You may need to install dependencies first:
 
 ## Building
 
-Podcast Downloader can be built using PyInstaller. First, make install PyInstaller if you don't have it:
+Podcast Downloader can be built using PyInstaller. First, install PyInstaller if you don't have it:
 
     pip install pyinstaller
 
