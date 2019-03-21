@@ -4,6 +4,10 @@
 
 Podcast Downloader is a simple utility for automatically downloading all podcasts listed in a given RSS file. The program is writen in Python and can be ran as-is or built into standalone Windows, Mac or Linux executables.
 
+## Releases
+
+Check the releases section on GitHub for releases and pre-built executables. Even if you want to build the exeutables yourself or run the Python file directly, the source code releases are more stable than the current master branch.
+
 ## Usage
 
 The startup files are in the `src` folder. Simply run one of the following commands (on either Windows, Mac or Linux).
