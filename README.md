@@ -1,6 +1,4 @@
-# Podcast Downloader
-
-![Podcast Downloader Icon](./src/icon/icon.svg)
+# Podcast Downloader ![Podcast Downloader Icon](./src/icon/icon.svg)
 
 Podcast Downloader is a simple utility for automatically downloading all podcasts listed in a given RSS file. The program is writen in Python and can be ran as-is or built into standalone Windows, Mac or Linux executables.
 
